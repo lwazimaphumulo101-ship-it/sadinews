@@ -7,13 +7,6 @@
 [functions]
   directory = "netlify/functions"
 
-# media uploaded by authors/admin are served from /_blob/<id>
-[[redirects]]
-  from = "/_blob/*"
-  to = "/api/asset/:splat"
-  status = 200
-  force = true
-
 [[headers]]
   for = "/*"
   [headers.values]

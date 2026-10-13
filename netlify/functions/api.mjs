@@ -282,7 +282,8 @@ async function asset(id, req) {
 export default async (req) => {
   try {
     const url = new URL(req.url);
-    const parts = url.pathname.replace(/^\/api\/?/, "").split("/").filter(Boolean);
+    const path = url.pathname.replace(/^\/_blob\//, "/api/asset/");
+    const parts = path.replace(/^\/api\/?/, "").split("/").filter(Boolean);
     if (req.method !== "GET" && req.method !== "HEAD") {
       const o = req.headers.get("origin");
       if (o && new URL(o).host !== url.host) return fail(403, "Bad origin");
@@ -297,4 +298,4 @@ export default async (req) => {
     return fail(500, "Server error");
   }
 };
-export const config = { path: "/api/*" };
+export const config = { path: ["/api/*", "/_blob/*"] };
