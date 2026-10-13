@@ -590,6 +590,7 @@ body>*{flex:none}
  var assetApi={upload:function(file,o){var type=(o&&o.type)||file.type;
    return fetch(API+"/upload",{method:"POST",credentials:"same-origin",headers:{"Content-Type":type},body:file}).then(function(r){return r.json().catch(function(){return{}}).then(function(j){
     if(!r.ok){var e=new Error(j.error||"Upload failed");e.code=r.status===413?"too_large":(r.status===401||r.status===403?"permission_denied":"error");throw e}return j})})},
+  importCover:function(url){return post("/import-cover",{url:url})},
   delete:function(id){return post("/db",{op:"assetDelete",id:id})}};
  window.SADI_AUTH={
   login:function(email,password){return post("/auth/login",{email:email,password:password})},
@@ -908,6 +909,7 @@ function editorForm(a){
  '<label class="f">Label above the headline<input class="inp" name="kicker" maxlength="40" placeholder="Personal finance" value="'+esc(a.kicker||"")+'"></label></div>'+
  '<label class="f">Story text<span class="h">Leave a blank line between paragraphs. Start a line with ## for a subheading, or &gt; for a pull quote.</span><textarea class="inp tall" name="body" required>'+esc(a.body||"")+'</textarea></label>'+
  '<label class="f">Cover photo'+((a.coverId||a.coverUrl)?" (a photo is already attached)":"")+'<input class="inp" type="file" name="cover" accept="image/png,image/jpeg,image/webp,image/gif"></label>'+
+ '<label class="f">Or import a cover photo from a link<span class="h" id="coverLinkHelp">Paste a direct HTTPS link to a PNG, JPG, GIF or WebP image (maximum 5 MB). A copy is saved to this site when you save or submit the article. Choose a file or a link, not both. Leave both blank to keep an existing cover.</span><input class="inp" type="url" name="coverLink" placeholder="https://example.com/photo.jpg" maxlength="2048" aria-describedby="coverLinkHelp"></label><p class="h" data-cover-status role="status" aria-live="polite"></p>'+
  '<div class="row"><button class="btn" type="submit" data-status="draft">Save draft</button>'+(adm?'<button class="btn red" type="submit" data-status="published">Publish now</button>':'<button class="btn red" type="submit" data-status="pending">Submit for review</button>')+"</div><p class=\"err\" id=\"formErr\" role=\"alert\"></p></form>"}
 function mediaForm(){
  return'<h2>Upload media</h2><form data-form="media"><div class="grid2"><label class="f">Type<select class="inp" name="type"><option value="image">Photo</option><option value="video">Video</option><option value="podcast">Podcast</option></select></label><label class="f">Title<input class="inp" name="title" required maxlength="120"></label></div>'+
@@ -1147,14 +1149,20 @@ var forms={
   uploadFile(file,"image").then(function(r){if(r){d.photoId=r.assetId;d.photoUrl=r.url}return Store.set("users",A.uid,d)}).then(function(){toast("Profile saved")},function(e){toast(e.message)})},
  article:function(f,ev){var st=ev.submitter&&ev.submitter.dataset.status||"draft";var id=f.dataset.id;
   var old=id?A.articles.find(function(a){return a.id===id}):null;
-  var file=g(f,"cover").files[0];setErr("");
-  uploadFile(file,"image").then(function(r){
+  var file=g(f,"cover").files[0],link=g(f,"coverLink").value.trim();setErr("");
+  if(f.dataset.saving==="1")return;
+  if(file&&link){setErr("Choose a cover photo file or a link, not both.");return}
+  if(link){try{var coverUrl=new URL(link);if(coverUrl.protocol!=="https:"||coverUrl.username||coverUrl.password||(coverUrl.port&&coverUrl.port!=="443"))throw new Error()}catch(e){setErr("Enter a direct HTTPS image link without login details or a custom port.");return}}
+  if(link&&(!A.assets||!A.assets.importCover)){setErr("Sign in as an author or administrator to import a cover photo.");return}
+  var buttons=Array.from(f.querySelectorAll('button[type="submit"]')),status=f.querySelector("[data-cover-status]");
+  f.dataset.saving="1";f.setAttribute("aria-busy","true");buttons.forEach(function(button){button.disabled=true});status.textContent=link?"Importing cover photo…":"Saving article…";
+  (link?A.assets.importCover(link).then(function(r){status.textContent="Cover photo imported. Saving article…";return{assetId:r.id}}):uploadFile(file,"image")).then(function(r){
    var d=Object.assign({},old||{},{title:g(f,"title").value.trim(),dek:g(f,"dek").value.trim(),cat:g(f,"cat").value,kicker:g(f,"kicker").value.trim(),body:g(f,"body").value,status:st,updated:Date.now()});
    if(!old){d.authorId=A.uid;d.created=Date.now()}
    if(r){d.coverId=r.assetId||null;d.coverUrl=r.url||null}
    if(st==="published"&&!d.publishedAt)d.publishedAt=Date.now();
    return id?Store.set("articles",id,d).then(function(){return id}):Store.add("articles",d)}).then(function(nid){
-   toast(st==="published"?"Published":st==="pending"?"Submitted for review":"Draft saved");location.hash=role()==="admin"&&st==="published"?"#/article/"+nid:"#/studio"},function(e){setErr(e.message)})},
+   toast(st==="published"?"Published":st==="pending"?"Submitted for review":"Draft saved");location.hash=role()==="admin"&&st==="published"?"#/article/"+nid:"#/studio"},function(e){setErr(e.message)}).finally(function(){delete f.dataset.saving;f.removeAttribute("aria-busy");buttons.forEach(function(button){button.disabled=false});status.textContent=""})},
  media:function(f){setErr("");var type=g(f,"type").value,file=g(f,"file").files[0],link=g(f,"link").value.trim();
   if(!file&&!link){setErr("Choose a file or paste a link.");return}
   uploadFile(file,type==="image"?"image":"").then(function(r){
