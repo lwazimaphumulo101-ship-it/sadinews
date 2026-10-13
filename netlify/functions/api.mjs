@@ -1,6 +1,7 @@
 // SADI NEWS backend: login, shared database and media uploads on Netlify Functions + Netlify Blobs.
 import { getStore } from "@netlify/blobs";
 import crypto from "node:crypto";
+import { fetchCoverImage } from "../lib/cover-image.mjs";
 
 const OWNER_EMAIL = (process.env.OWNER_EMAIL || "lwaziimange2@gmail.com").trim().toLowerCase();
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
@@ -257,6 +258,21 @@ async function upload(req) {
   await assetStore().set(id, ab, { metadata: { type, uid: v.uid } });
   return J({ id, url: "/_blob/" + id });
 }
+async function importCover(req) {
+  const v = await viewer(req);
+  if (!v.uid) return fail(401, "Sign in first.");
+  if (v.role !== "admin" && v.role !== "author") return fail(403, "Only authors can import cover photos.");
+  const body = await req.text();
+  if (body.length > 4096) return fail(413, "The image link is too long.");
+  let input;
+  try { input = JSON.parse(body); } catch { return fail(400, "Enter a valid image link."); }
+  let image;
+  try { image = await fetchCoverImage(input && input.url, MAX_STAFF_UPLOAD); }
+  catch (error) { return fail(error.status || 422, error.message); }
+  const id = crypto.randomBytes(16).toString("hex");
+  await assetStore().set(id, image.data, { metadata: { type: image.type, uid: v.uid } });
+  return J({ id, url: "/_blob/" + id });
+}
 async function asset(id, req) {
   if (!/^[a-f0-9]{32}$/.test(id)) return new Response("Not found", { status: 404 });
   const a = await assetStore().getWithMetadata(id, { type: "arrayBuffer" });
@@ -290,6 +306,7 @@ export default async (req) => {
     if (parts[0] === "auth") return await auth(parts[1], req);
     if (parts[0] === "db" && req.method === "POST") return await db(req);
     if (parts[0] === "upload" && req.method === "POST") return await upload(req);
+    if (parts[0] === "import-cover" && req.method === "POST") return await importCover(req);
     if (parts[0] === "asset" && parts[1]) return await asset(parts[1], req);
     return fail(404, "Not found");
   } catch (e) {
