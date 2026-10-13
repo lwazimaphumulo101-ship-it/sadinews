@@ -1,5 +1,5 @@
 [build]
-  publish = "public"
+  publish = "Public"
 
 [build.environment]
   NODE_VERSION = "20"
