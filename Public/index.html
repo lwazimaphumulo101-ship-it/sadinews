@@ -447,6 +447,63 @@ body>*{flex:none}
 .dash .side-nav{top:12px}
 @media (max-width:820px){.dash .side-nav{top:0}}
 @media (max-width:640px),(max-height:620px){.ticker{display:none}.mast .wrap{min-height:56px}.brand img{width:40px;height:40px}.util .wrap{min-height:34px}}
+
+/* ===== mobile layout fixes: keep all text and content inside the screen ===== */
+html,body{max-width:100%;overflow-x:hidden}
+#app,#main,footer,.page,.article,.card,.note,.stat,.story,.ad,.chat,dialog{min-width:0;max-width:100%}
+h1,h2,h3,h4,p,li,td,th,a,b,span,label,.note,.sub,.dek,.bodytxt,blockquote{overflow-wrap:break-word;word-wrap:break-word}
+p,.bodytxt,.note,.sub,.card,td{overflow-wrap:anywhere}
+.article .bodytxt img,.article .bodytxt video,.article .bodytxt iframe,.bodytxt img,.bodytxt video,.bodytxt iframe,iframe,video{max-width:100%;height:auto}
+.bodytxt pre,.bodytxt code{white-space:pre-wrap;word-break:break-word}
+.grid2>*,.grid3>*,.grid4>*,.cat-grid>*,.band .grid>*,.vids>*,.mgrid>*,.login-cards>*,.livewrap>*,.dash>*,footer .cols>*{min-width:0}
+.util .right{flex-wrap:wrap;justify-content:flex-end;min-width:0}
+.brand{min-width:0}
+.brand .tag{min-width:0}
+@media (max-width:640px){
+  body{font-size:15.5px}
+  .wrap{padding-left:14px;padding-right:14px}
+  .util .wrap{gap:6px;flex-wrap:wrap;padding-top:2px;padding-bottom:2px}
+  .util .date{display:none}
+  .util .right{width:100%;gap:2px}
+  .util a,.util button{padding:7px 8px;font-size:13px}
+  .nav li a{padding:13px 12px 10px;font-size:13px}
+  .page{padding:20px 0 40px}
+  .page h1,.article h1{font-size:clamp(24px,7.5vw,34px);line-height:1.1;letter-spacing:-.02em}
+  .page .sub{font-size:15.5px}
+  .lead h2{font-size:clamp(24px,7.5vw,32px);letter-spacing:-.02em;line-height:1.1}
+  .lead p{font-size:16px}
+  .sec-head{flex-wrap:wrap;gap:6px 12px}
+  .sec-head h2{font-size:21px}
+  .article .dek{font-size:17px}
+  .article .bodytxt{font-size:17px;line-height:1.7}
+  .article .bodytxt h3{font-size:21px}
+  .article .bodytxt blockquote{font-size:18px;padding:4px 14px}
+  .card{padding:16px}
+  .note{padding:10px 12px}
+  .stat b{font-size:26px}
+  .row{gap:10px}
+  .row .btn{flex:1 1 auto;text-align:center}
+  .latest h3,.cat-grid .story h3,.band .story h3{font-size:17px}
+  .side .story{grid-template-columns:96px minmax(0,1fr)}
+  .author-head{gap:14px}
+  .author-head .av{width:72px;height:72px;font-size:26px}
+  .chat{height:380px}
+  .vids{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .vid h3{font-size:15px}
+  .mgrid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+  .reader .body,dialog.media-dlg .body{padding:16px 16px 22px}
+  .slot-sidebar{max-width:100%}
+  footer .cols{grid-template-columns:1fr;gap:22px}
+  footer .small{flex-direction:column}
+  .search .wrap{gap:8px}
+  .search input{min-width:0}
+  .tabs button{padding:6px 13px;font-size:14px}
+}
+@media (max-width:380px){
+  .brand .tag{font-size:15px}
+  .vids{grid-template-columns:1fr}
+  .side .story,.latest .story{grid-template-columns:84px minmax(0,1fr);gap:10px}
+}
 </style>
 </head>
 <body>
@@ -491,7 +548,7 @@ body>*{flex:none}
       <li><a href="#/section/business" data-nav="section/business">Business</a></li>
       <li><a href="#/section/sport" data-nav="section/sport">Sport</a></li>
       <li><a href="#/media" data-nav="media">Media</a></li>
-      <li><a href="#/authors" data-nav="authors">Authors</a></li>
+      <li class="staff-only" hidden><a href="#/authors" data-nav="authors">Authors</a></li>
     </ul>
     <a class="live" href="#/live"><span class="dot"></span>Live</a>
   </div>
@@ -530,7 +587,7 @@ body>*{flex:none}
       <div><h4>Sections</h4><ul>
         <li><a href="#/section/sa">South Africa</a></li><li><a href="#/section/africa">Africa</a></li><li><a href="#/section/world">World</a></li><li><a href="#/section/business">Business</a></li><li><a href="#/section/sport">Sport</a></li></ul></div>
       <div><h4>SADI NEWS</h4><ul>
-        <li><a href="#/authors">Our authors</a></li><li><a href="#/media">Photos, video &amp; podcasts</a></li><li><a href="#/live">Live</a></li><li><a href="#/advertise">Advertise with us</a></li><li><a href="#/login">Sign in</a></li></ul></div>
+        <li class="staff-only" hidden><a href="#/authors">Our authors</a></li><li><a href="#/media">Photos, video &amp; podcasts</a></li><li><a href="#/live">Live</a></li><li><a href="#/advertise">Advertise with us</a></li><li><a href="#/login">Sign in</a></li></ul></div>
       <div><h4>Follow</h4><ul>
         <li><a href="#">Facebook</a></li><li><a href="#">X</a></li><li><a href="#">Instagram</a></li><li><a href="#">TikTok</a></li></ul></div>
     </div>
@@ -793,7 +850,7 @@ function bodyHtml(b){
   return"<p>"+esc(p).replace(/\n/g,"<br>")+"</p>"}).join("")}
 function viewArticle(id){
  var s=findStory(id);if(!s)return viewNotFound();
- var auth=s.author?'<a class="byline" href="#/author/'+esc(s.author)+'">'+av(s.author)+"<span><b>"+esc(userName(s.author))+'</b><br><span class="meta">'+ago(s.ms)+"</span></span></a>":'<div class="byline"><span class="meta">SADI NEWS · '+ago(s.ms)+"</span></div>";
+ var auth=s.author?(isStaff()?'<a class="byline" href="#/author/'+esc(s.author)+'">':'<div class="byline">')+av(s.author)+"<span><b>"+esc(userName(s.author))+'</b><br><span class="meta">'+ago(s.ms)+"</span></span>"+(isStaff()?"</a>":"</div>"):'<div class="byline"><span class="meta">SADI NEWS · '+ago(s.ms)+"</span></div>";
  var body=s.sample?'<div class="note">Sample story. Replace this with a real article from the Author studio.</div><p>'+esc(s.d)+"</p>":bodyHtml(s.body);
  var saved=A.saved.indexOf(s.id)>-1;
  var rel=stories().filter(function(x){return x.c===s.c&&x.id!==s.id}).slice(0,3);
@@ -805,6 +862,7 @@ function viewArticle(id){
  (rel.length?'<div style="margin-top:40px"><div class="sec-head"><h2>More in '+esc(CATS[s.c])+'</h2></div><div class="cat-grid">'+rel.map(function(x){return card(x,true)}).join("")+"</div></div>":"")+"</div>"}
 
 function viewAuthors(){
+ if(!isStaff())return viewNotFound();
  var ids=authorIds();
  return'<div class="wrap page"><h1>Our authors</h1><p class="sub">The reporters and contributors behind SADI NEWS.</p>'+
  (ids.length?'<div class="grid3">'+ids.map(function(id){var n=A.articles.filter(function(a){return a.authorId===id&&a.status==="published"}).length;var u=A.users.find(function(x){return x.id===id});
@@ -812,6 +870,7 @@ function viewAuthors(){
   '<div class="empty-state">No authors yet. Authors appear here after the admin approves them.</div>')+
  '<div class="card soft" style="margin-top:28px"><h3>Want to write for SADI NEWS?</h3><p>Sign in, open the Author login and send an application. The editor reviews every request.</p><a class="btn red" href="#/login">Apply as an author</a></div></div>'}
 function viewAuthor(id){
+ if(!isStaff())return viewNotFound();
  var u=A.users.find(function(x){return x.id===id});
  if(!u&&authorIds().indexOf(id)<0)return viewNotFound();
  var l=A.articles.filter(function(a){return a.authorId===id&&a.status==="published"}).sort(function(a,b){return(b.publishedAt||0)-(a.publishedAt||0)});
@@ -854,7 +913,7 @@ function chatHtml(){
 function viewAdvertise(){
  return'<div class="wrap page"><h1>Advertise with SADI NEWS</h1><p class="sub">Reach a mobile-first South African audience. Every ad is clearly labelled and kept separate from editorial decisions.</p>'+
  '<div class="grid3">'+Object.keys(SLOTS).map(function(k){return'<div class="card"><h3>'+SLOTS[k]+'</h3><p class="meta">'+({top:"Wide banner shown across the top of pages.",sidebar:"A box beside the news list.",feed:"Between stories in the news list.",article:"At the end of every article.",footer:"A banner above the footer on every page."})[k]+"</p></div>"}).join("")+"</div>"+
- '<div class="card soft" style="margin-top:24px"><h3>Get in touch</h3><p>Email [ADVERTISING EMAIL] or message [PHONE / WHATSAPP NUMBER] for the rate card and availability.</p></div></div>'}
+ '<div class="card soft" style="margin-top:24px"><h3>Get in touch</h3><p>Contact us for the rate card and availability.</p><p class="contact-lines"><b>Email:</b> <a href="mailto:sadinews@outlook.com">sadinews@outlook.com</a><br><b>WhatsApp:</b> <a href="https://wa.me/27788308665" target="_blank" rel="noopener">078 830 8665</a></p><div class="row"><a class="btn red" href="mailto:sadinews@outlook.com">Email us</a><a class="btn" href="https://wa.me/27788308665" target="_blank" rel="noopener">Message on WhatsApp</a></div></div></div>'}
 function viewNotFound(){return'<div class="wrap page"><h1>Page not found</h1><p class="sub">That page does not exist or has moved.</p><a class="btn red" href="#/">Back to the homepage</a></div>'}
 
 /* ---------- login / account ---------- */
@@ -1053,6 +1112,7 @@ function chrome(){
  $("#authBox").innerHTML=r==="visitor"?'<a href="#/login">Sign in</a>':'<a class="who" href="#/account"><span class="av">'+esc(initials(myName()))+"</span>"+esc(myName().split(" ")[0])+"</a>";
  $("#staffLinks").innerHTML=(isStaff()&&r!=="admin"?'<a href="#/studio">Studio</a>':"")+(r==="admin"?'<a href="#/admin">Dashboard</a>':"");
  $("#demoFlag").hidden=true;
+ document.querySelectorAll(".staff-only").forEach(function(el){el.hidden=!isStaff()});
  var b=setting("breaking","").split("\n").map(function(x){return x.trim()}).filter(Boolean);
  var tk=b.length?b.map(function(t){return'<a href="#/">'+esc(t)+"</a>"}).join(""):stories().slice(0,8).map(function(s){return'<a href="#/article/'+esc(s.id)+'">'+esc(s.t)+"</a>"}).join("");
  var run=$("#run");if(run.dataset.k!==tk){run.dataset.k=tk;run.innerHTML=tk+tk}
