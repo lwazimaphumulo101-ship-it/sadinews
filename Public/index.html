@@ -499,6 +499,10 @@ p,.bodytxt,.note,.sub,.card,td{overflow-wrap:anywhere}
   .search input{min-width:0}
   .tabs button{padding:6px 13px;font-size:14px}
 }
+/* normal page scrolling so browsers can pull-to-refresh and reload */
+html,body{height:auto;overflow-y:auto;overscroll-behavior-y:auto}
+body{display:block}
+#scroller{overflow:visible;overscroll-behavior:auto;min-height:0}
 @media (max-width:380px){
   .brand .tag{font-size:15px}
   .vids{grid-template-columns:1fr}
@@ -1096,7 +1100,7 @@ function render(force){
  else html=viewNotFound();
  $("#app").innerHTML=html;lastLive=liveSig();
  chrome();fillAds();if(r==="live")paintChat();
- var key=location.hash;if(key!==lastKey){recordAudienceView(key);lastKey=key;if(!force)(function(){var sc=document.getElementById("scroller");sc?sc.scrollTo(0,0):window.scrollTo(0,0)})()}
+ var key=location.hash;if(key!==lastKey){recordAudienceView(key);lastKey=key;if(!force)(function(){var sc=document.getElementById("scroller");window.scrollTo(0,0);if(sc)sc.scrollTop=0})()}
  var m=$("#msgs");if(m)m.scrollTop=m.scrollHeight;
  $$("#navList a").forEach(function(a){a.removeAttribute("aria-current");var n=a.dataset.nav;if((n==="home"&&r==="home")||(n===r)||(n==="section/"+p[1]&&r==="section"))a.setAttribute("aria-current","page")})}
 var pend=null;
